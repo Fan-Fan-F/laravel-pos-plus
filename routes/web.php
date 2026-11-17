@@ -8,6 +8,7 @@ use App\Http\Controllers\Management\CustomerController;
 use App\Http\Controllers\Management\SupplierController;
 use App\Http\Controllers\Pos\CartController;
 use App\Http\Controllers\Pos\OrderController;
+use App\Http\Controllers\Report\ReportController;
 use App\Http\Controllers\Settings\SettingController;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Redirector;
@@ -49,7 +50,13 @@ Route::prefix('admin')->middleware(['auth', 'locale'])->group(function (): void 
     });
 
     // Orders
+    Route::get('/orders/{order}/receipt', [OrderController::class, 'receipt'])->name('orders.receipt');
+    Route::get('/orders/{order}/print', [OrderController::class, 'print'])->name('orders.print');
     Route::post('/orders/partial-payment', [OrderController::class, 'partialPayment'])->name('orders.partial-payment');
+
+    // Sales & Inventory Reports
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/export', [ReportController::class, 'export'])->name('reports.export');
 
     // Translations
     Route::get('/locale/{type}', function ($type) {

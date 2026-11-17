@@ -45,6 +45,14 @@
                     </a>
                 </li>
 
+                <!-- Reports -->
+                <li class="nav-item">
+                    <a href="{{ route('reports.index') }}" class="nav-link {{ activeSegment('reports') }}">
+                        <i class="nav-icon fas fa-chart-line"></i>
+                        <p>{{ __('Reports') }}</p>
+                    </a>
+                </li>
+
                 <!-- Customers -->
                 <li class="nav-item">
                     <a href="{{ route('customers.index') }}" class="nav-link {{ activeSegment('customers') }}">

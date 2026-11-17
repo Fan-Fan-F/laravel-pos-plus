@@ -9,9 +9,10 @@ trait ProductScopes
     /**
      * Check if product is low stock.
      */
-    public function isLowStock(): bool
+    public function isLowStock(?int $threshold = null): bool
     {
-        return $this->quantity < 10;
+        $limit = $threshold ?? (int) (config('settings.warning_quantity') ?: 10);
+        return $this->quantity < $limit;
     }
 
     /**
@@ -19,7 +20,7 @@ trait ProductScopes
      */
     public function isOutOfStock(): bool
     {
-        return $this->quantity === 0;
+        return $this->quantity <= 0;
     }
 
     /**
@@ -33,9 +34,18 @@ trait ProductScopes
     /**
      * Scope for low stock products.
      */
-    public function scopeLowStock($query)
+    public function scopeLowStock($query, ?int $threshold = null)
     {
-        return $query->where('quantity', '<', 10);
+        $limit = $threshold ?? (int) (config('settings.warning_quantity') ?: 10);
+        return $query->where('quantity', '<', $limit);
+    }
+
+    /**
+     * Scope for out of stock products.
+     */
+    public function scopeOutOfStock($query)
+    {
+        return $query->where('quantity', '<=', 0);
     }
 
     /**

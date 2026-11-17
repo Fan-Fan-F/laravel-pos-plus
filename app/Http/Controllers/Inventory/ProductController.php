@@ -24,6 +24,8 @@ class ProductController extends Controller
     {
         $products = Product::query()
             ->search($request->search)
+            ->when($request->stock_status === 'low_stock', fn($q) => $q->lowStock())
+            ->when($request->stock_status === 'out_of_stock', fn($q) => $q->where('quantity', '<=', 0))
             ->latest()
             ->paginate(10);
 

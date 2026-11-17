@@ -13,21 +13,49 @@ class OrderController extends Controller
 {
     public function index(Request $request): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
-        $orders = Order::query()
+        $filteredQuery = Order::query()
             ->with(['items.product', 'payments', 'customer'])
             ->when($request->input('start_date'), function ($query, $startDate): void {
                 $query->where('created_at', '>=', $startDate);
             })
             ->when($request->input('end_date'), function ($query, string $endDate): void {
                 $query->where('created_at', '<=', $endDate . ' 23:59:59');
-            })
+            });
+
+        // Compute totals across all filtered orders
+        $allOrders = (clone $filteredQuery)->get();
+        $total = $allOrders->sum(fn($order) => $order->total());
+        $receivedAmount = $allOrders->sum(fn($order) => $order->receivedAmount());
+
+        $orders = $filteredQuery
             ->latest()
             ->paginate(10);
 
-        $total = $orders->sum(fn($order) => $order->total());
-        $receivedAmount = $orders->sum(fn($order) => $order->receivedAmount());
-
         return view('orders.index', ['orders' => $orders, 'total' => $total, 'receivedAmount' => $receivedAmount]);
+    }
+
+    /**
+     * Generate 80mm thermal receipt PDF for the order.
+     */
+    public function receipt(Order $order)
+    {
+        $order->load(['customer', 'user', 'items.product', 'payments']);
+
+        $pdf = app('dompdf.wrapper');
+        $pdf->loadView('orders.receipt', ['order' => $order]);
+        $pdf->setPaper([0, 0, 226.77, 841.89], 'portrait'); // 80mm width
+
+        return $pdf->stream("order-receipt-{$order->id}.pdf");
+    }
+
+    /**
+     * Display printable HTML thermal receipt with auto-print.
+     */
+    public function print(Order $order)
+    {
+        $order->load(['customer', 'user', 'items.product', 'payments']);
+
+        return view('orders.print', ['order' => $order]);
     }
 
     public function store(OrderStoreRequest $request): \Illuminate\Http\JsonResponse

@@ -21,7 +21,7 @@
          <!-- small box -->
          <div class="small-box bg-success">
             <div class="inner">
-               <h3>{{config('settings.currency_symbol')}} {{number_format($income, 2)}}</h3>
+               <h3>{{ currency_format($income) }}</h3>
                <p>{{ __('dashboard.Income') }}</p>
             </div>
             <div class="icon">
@@ -35,7 +35,7 @@
          <!-- small box -->
          <div class="small-box bg-danger">
             <div class="inner">
-               <h3>{{config('settings.currency_symbol')}} {{number_format($income_today, 2)}}</h3>
+               <h3>{{ currency_format($income_today) }}</h3>
                <p>{{ __('dashboard.Income_Today') }}</p>
             </div>
             <div class="icon">

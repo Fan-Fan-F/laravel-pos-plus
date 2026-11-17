@@ -50,8 +50,8 @@
                     <tr>
                         <td>{{$order->id}}</td>
                         <td>{{$order->getCustomerName()}}</td>
-                        <td>{{ config('settings.currency_symbol') }} {{number_format($orderTotal, 2)}}</td>
-                        <td>{{ config('settings.currency_symbol') }} {{number_format($orderReceived, 2)}}</td>
+                        <td>{{ currency_format($orderTotal) }}</td>
+                        <td>{{ currency_format($orderReceived) }}</td>
                         <td>
                             @if($orderReceived == 0)
                                 <span class="badge badge-danger">{{ __('order.Not_Paid') }}</span>
@@ -61,7 +61,7 @@
                                 <span class="badge badge-success">{{ __('order.Paid') }}</span>
                             @endif
                         </td>
-                        <td>{{config('settings.currency_symbol')}} {{number_format($orderRemaining, 2)}}</td>
+                        <td>{{ currency_format($orderRemaining) }}</td>
                         <td>{{$order->created_at}}</td>
                         <td>
                             <button
@@ -73,16 +73,26 @@
                                 data-total="{{ $orderTotal }}"
                                 data-received="{{ $orderReceived }}"
                                 data-items='@json($order->items)'
-                                data-created-at="{{ $order->created_at }}">
+                                data-created-at="{{ $order->created_at }}"
+                                title="View Invoice">
                                 <ion-icon size="small" name="eye"></ion-icon>
                             </button>
+
+                            <a href="{{ route('orders.print', $order) }}" target="_blank" class="btn btn-sm btn-info" title="Print 80mm Receipt">
+                                <i class="fas fa-print"></i>
+                            </a>
+
+                            <a href="{{ route('orders.receipt', $order) }}" target="_blank" class="btn btn-sm btn-outline-danger" title="Download PDF Receipt">
+                                <i class="fas fa-file-pdf"></i>
+                            </a>
 
                             @if($orderRemaining > 0)
                                 <button class="btn btn-sm btn-primary btnPartialPayment"
                                         data-toggle="modal"
                                         data-target="#partialPaymentModal"
                                         data-order-id="{{ $order->id }}"
-                                        data-remaining-amount="{{ $orderRemaining }}">
+                                        data-remaining-amount="{{ $orderRemaining }}"
+                                        title="Pay Partial">
                                     Pay Partial
                                 </button>
                             @endif
@@ -94,8 +104,8 @@
                 <tr>
                     <th></th>
                     <th></th>
-                    <th>{{ config('settings.currency_symbol') }} {{ number_format($total, 2) }}</th>
-                    <th>{{ config('settings.currency_symbol') }} {{ number_format($receivedAmount, 2) }}</th>
+                    <th>{{ currency_format($total) }}</th>
+                    <th>{{ currency_format($receivedAmount) }}</th>
                     <th></th>
                     <th></th>
                     <th></th>
@@ -153,6 +163,12 @@
                     <!-- Dynamic content will be inserted here -->
                 </div>
                 <div class="modal-footer">
+                    <a id="btnModalPrintReceipt" href="#" target="_blank" class="btn btn-info">
+                        <i class="fas fa-print"></i> Print Receipt
+                    </a>
+                    <a id="btnModalPdfReceipt" href="#" target="_blank" class="btn btn-outline-danger">
+                        <i class="fas fa-file-pdf"></i> Download PDF
+                    </a>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
             </div>
@@ -177,6 +193,9 @@
                 var receivedAmount = button.data('received');
                 var createdAt = button.data('created-at');
                 var items = button.data('items');
+
+                $('#btnModalPrintReceipt').attr('href', '/admin/orders/' + orderId + '/print');
+                $('#btnModalPdfReceipt').attr('href', '/admin/orders/' + orderId + '/receipt');
 
                 console.log('Items:', items);
 

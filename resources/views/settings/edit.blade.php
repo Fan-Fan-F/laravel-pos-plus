@@ -29,14 +29,41 @@
                 @enderror
             </div>
 
-            <div class="form-group">
-                <label for="currency_symbol">{{ __('settings.Currency_symbol') }}</label>
-                <input type="text" name="currency_symbol" class="form-control @error('currency_symbol') is-invalid @enderror" id="currency_symbol" placeholder="{{ __('settings.Currency_symbol') }}" value="{{ old('currency_symbol', config('settings.currency_symbol')) }}">
-                @error('currency_symbol')
-                <span class="invalid-feedback" role="alert">
-                    <strong>{{ $message }}</strong>
-                </span>
-                @enderror
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="currency_preset">Currency Preset</label>
+                        <select id="currency_preset" class="form-control" onchange="applyCurrencyPreset(this.value)">
+                            <option value="">-- Choose preset or type below --</option>
+                            <option value="$">USD / CAD / AUD ($)</option>
+                            <option value="€">EUR (€)</option>
+                            <option value="£">GBP (£)</option>
+                            <option value="¥">CNY / JPY (¥)</option>
+                            <option value="៛">KHR - Cambodian Riel (៛)</option>
+                            <option value="₹">INR - Indian Rupee (₹)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="currency_symbol">{{ __('settings.Currency_symbol') }}</label>
+                        <input type="text" name="currency_symbol" class="form-control @error('currency_symbol') is-invalid @enderror" id="currency_symbol" placeholder="{{ __('settings.Currency_symbol') }}" value="{{ old('currency_symbol', config('settings.currency_symbol', '$')) }}">
+                        @error('currency_symbol')
+                        <span class="invalid-feedback" role="alert">
+                            <strong>{{ $message }}</strong>
+                        </span>
+                        @enderror
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="currency_placement">Symbol Position</label>
+                        <select name="currency_placement" id="currency_placement" class="form-control">
+                            <option value="left" {{ old('currency_placement', config('settings.currency_placement', 'left')) == 'left' ? 'selected' : '' }}>Left ($ 10.00)</option>
+                            <option value="right" {{ old('currency_placement', config('settings.currency_placement', 'left')) == 'right' ? 'selected' : '' }}>Right (10.00 $ / 10.00 ៛)</option>
+                        </select>
+                    </div>
+                </div>
             </div>
             <div class="form-group">
                 <label for="warning_quantity">{{ __('settings.warning_quantity') }}</label>
@@ -51,4 +78,18 @@
         </form>
     </div>
 </div>
+@endsection
+
+@section('js')
+<script>
+    function applyCurrencyPreset(symbol) {
+        if (!symbol) return;
+        document.getElementById('currency_symbol').value = symbol;
+        if (symbol === '៛') {
+            document.getElementById('currency_placement').value = 'right';
+        } else {
+            document.getElementById('currency_placement').value = 'left';
+        }
+    }
+</script>
 @endsection

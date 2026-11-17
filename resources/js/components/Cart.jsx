@@ -262,8 +262,19 @@ class Cart extends Component {
             },
             allowOutsideClick: () => !Swal.isLoading(),
         }).then((result) => {
-            if (result.value) {
-                //
+            if (result.value && result.value.order_id) {
+                const orderId = result.value.order_id;
+                Swal.fire({
+                    icon: 'success',
+                    title: result.value.message || 'Order created successfully!',
+                    showCancelButton: true,
+                    confirmButtonText: '🖨️ Print Receipt',
+                    cancelButtonText: 'Done',
+                }).then((printResult) => {
+                    if (printResult.isConfirmed) {
+                        window.open(`/admin/orders/${orderId}/print?autoprint=1`, '_blank');
+                    }
+                });
             }
         });
     }

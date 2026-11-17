@@ -3,7 +3,14 @@
 @section('title', __('product.Product_List'))
 @section('content-header', __('product.Product_List'))
 @section('content-actions')
-<a href="{{route('products.create')}}" class="btn btn-primary">{{ __('product.Create_Product') }}</a>
+<a href="{{ route('products.index') }}" class="btn btn-sm btn-outline-secondary mr-1 {{ !request('stock_status') ? 'active' : '' }}">All Products</a>
+<a href="{{ route('products.index', ['stock_status' => 'low_stock']) }}" class="btn btn-sm btn-outline-warning mr-1 {{ request('stock_status') == 'low_stock' ? 'active' : '' }}">
+    <i class="fas fa-exclamation-triangle"></i> Low Stock
+</a>
+<a href="{{ route('products.index', ['stock_status' => 'out_of_stock']) }}" class="btn btn-sm btn-outline-danger mr-2 {{ request('stock_status') == 'out_of_stock' ? 'active' : '' }}">
+    <i class="fas fa-times-circle"></i> Out of Stock
+</a>
+<a href="{{route('products.create')}}" class="btn btn-primary"><i class="fas fa-plus"></i> {{ __('product.Create_Product') }}</a>
 @endsection
 @section('css')
 <link rel="stylesheet" href="{{ asset('plugins/sweetalert2/sweetalert2.min.css') }}">
@@ -33,8 +40,16 @@
                     <td>{{$product->name}}</td>
                     <td><img class="product-img" src="{{ Storage::url($product->image) }}" alt=""></td>
                     <td>{{$product->barcode}}</td>
-                    <td>{{$product->price}}</td>
-                    <td>{{$product->quantity}}</td>
+                    <td>{{ currency_format($product->price) }}</td>
+                    <td>
+                        @if($product->quantity <= 0)
+                            <span class="badge badge-danger">0 (Out of Stock)</span>
+                        @elseif($product->isLowStock())
+                            <span class="badge badge-warning">{{ $product->quantity }} (Low)</span>
+                        @else
+                            <span class="badge badge-success">{{ $product->quantity }}</span>
+                        @endif
+                    </td>
                     <td>
                         <span class="right badge badge-{{ $product->status ? 'success' : 'danger' }}">{{$product->status ? __('common.Active') : __('common.Inactive') }}</span>
                     </td>
